@@ -1,0 +1,22 @@
+{
+  "name": "english-practice-reports",
+  "version": "1.0.0",
+  "description": "Generate and send English practice reports via Gmail",
+  "main": "reportSystem.js",
+  "scripts": {
+    "start": "node reportSystem.js",
+    "send-reports": "node reportSystem.js",
+    "generate-reports": "node reportSystem.js --generate-only"
+  },
+  "dependencies": {
+    "googleapis": "^126.0.1",
+    "nodemailer": "^6.9.7",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7",
+    "dotenv": "^16.3.1",
+    "pg": "^8.16.3"
+  },
+  "keywords": ["gmail", "reports", "education", "email"],
+  "author": "Your Name",
+  "license": "MIT"
+}

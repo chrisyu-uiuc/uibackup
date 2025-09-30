@@ -1,0 +1,68 @@
+{
+  "user_info": {
+    "user_id": "563bdd48-acf4-45d3-b011-cc1a574f76bd",
+    "user_name": "SPIT",
+    "user_email": "admin@spit.hk"
+  },
+  "summary": {
+    "total_chats": 6,
+    "total_messages": 38,
+    "student_messages": 19,
+    "chatbot_messages": 19,
+    "total_tokens": 714,
+    "models_used": [
+      "gpt-4o"
+    ],
+    "last_activity": "2025-09-30T01:17:29.000Z"
+  },
+  "chat_overview": [
+    {
+      "chat_id": "a2c71fd2-c8af-48cf-b271-964817901790",
+      "title": "Clarification Request 🧐",
+      "message_count": 8,
+      "created_at": "2025-09-30T01:14:58.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_1_Clarification_Request___.json"
+    },
+    {
+      "chat_id": "2dd7d0d9-eefa-48ea-ac1e-bb0af30bb873",
+      "title": "👋 Starting a Conversation",
+      "message_count": 6,
+      "created_at": "2025-09-29T17:18:14.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_2____Starting_a_Conversation.json"
+    },
+    {
+      "chat_id": "0f9a3f74-54b2-4342-b536-8b74fcfd2fc2",
+      "title": "👋 Friendly Greeting Exchange",
+      "message_count": 16,
+      "created_at": "2025-09-29T17:09:48.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_3____Friendly_Greeting_Exchange.json"
+    },
+    {
+      "chat_id": "f16addc1-d19e-45fe-8f23-7e0804524af1",
+      "title": "新增對話",
+      "message_count": 2,
+      "created_at": "2025-09-29T17:14:38.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_4_____.json"
+    },
+    {
+      "chat_id": "96275d2c-b075-4252-808c-f6a225502606",
+      "title": "🎹 Organ Clarification Chat",
+      "message_count": 2,
+      "created_at": "2025-09-29T16:14:13.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_5____Organ_Clarification_Chat.json"
+    },
+    {
+      "chat_id": "b74796ef-40e0-466a-9686-2a7bb4e59d05",
+      "title": "👋 Casual Greeting Chat",
+      "message_count": 4,
+      "created_at": "2025-09-29T13:29:10.000Z",
+      "assessment_status": "completed",
+      "file_name": "chat_6____Casual_Greeting_Chat.json"
+    }
+  ]
+}
