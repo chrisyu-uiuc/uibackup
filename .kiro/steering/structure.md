@@ -5,9 +5,9 @@
 ├── .env                           # Environment configuration
 ├── package.json                   # Node.js dependencies and scripts
 ├── english_analytics_dashboard.html  # Frontend dashboard interface
-├── nodeserver.js                  # Express server for web dashboard
-├── main10.js                      # Database extraction and report generation
-├── reportSystem5.js               # Email delivery system
+├── dashboard-server.js            # Express server for web dashboard
+├── generate-reports.js            # Database extraction and report generation
+├── email-sender.js                # Email delivery system
 └── reports/                       # Generated report storage
 ```
 
@@ -28,12 +28,12 @@ reports/
 - **Summary files**: Always named `user_summary.json`
 
 ## Data Flow Architecture
-1. **main10.js**: Database → JSON reports
-2. **reportSystem5.js**: JSON reports → HTML emails
-3. **nodeserver.js**: JSON reports → Web dashboard
+1. **generate-reports.js**: Database → JSON reports
+2. **email-sender.js**: JSON reports → HTML emails
+3. **dashboard-server.js**: JSON reports → Web dashboard
 4. **Dashboard**: Static HTML + Express API endpoints
 
-## API Endpoints (nodeserver.js)
+## API Endpoints (dashboard-server.js)
 - `GET /api/dates` - Available report dates
 - `GET /api/users/:date` - Users for specific date
 - `GET /api/user-summary/:date/:userId` - User summary data
@@ -41,14 +41,14 @@ reports/
 - `GET /` - Main dashboard interface
 
 ## Code Organization Patterns
-- **Database queries**: Centralized in main10.js
-- **Email templates**: Inline HTML generation in reportSystem5.js
+- **Database queries**: Centralized in generate-reports.js
+- **Email templates**: Inline HTML generation in email-sender.js
 - **File operations**: Consistent use of fs-extra for async operations
 - **Error handling**: Try-catch blocks with detailed console logging
 - **Configuration**: Environment variables via dotenv
 
 ## Development Workflow
-1. Run `main10.js` to generate reports from database
-2. Run `reportSystem5.js` to send email reports
-3. Run `nodeserver.js` to view dashboard at localhost:3000
+1. Run `generate-reports.js` to generate reports from database
+2. Run `email-sender.js` to send email reports
+3. Run `dashboard-server.js` to view dashboard at localhost:3000
 4. Reports persist in filesystem for historical analysis

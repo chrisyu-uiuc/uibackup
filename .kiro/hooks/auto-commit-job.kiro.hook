@@ -1,0 +1,18 @@
+{
+  "enabled": false,
+  "name": "Auto Commit Job Done",
+  "description": "Automatically commits changes to git when report generation jobs are completed, ensuring all generated reports and updates are saved to version control",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "reports/**/*.json",
+      "*.js",
+      "package.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A report generation job has completed and files have been updated. Please commit all changes to git with an appropriate commit message that describes what reports were generated or what job was completed. Use git add . followed by git commit with a descriptive message."
+  }
+}

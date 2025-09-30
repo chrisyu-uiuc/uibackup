@@ -29,13 +29,13 @@
 ### Development
 ```bash
 # Start the web dashboard server
-node nodeserver.js
+node dashboard-server.js
 
 # Generate reports from database
-node main10.js
+node generate-reports.js
 
 # Send email reports to users
-node reportSystem5.js
+node email-sender.js
 ```
 
 ### Package Management

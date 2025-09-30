@@ -50,12 +50,12 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
    TEACHER_EMAIL=teacher@example.com
    ```
 
-4. Update database connection string in `main10.js`:
+4. Update database connection string in `generate-reports.js`:
    ```javascript
    const connectionString = 'postgresql://user:password@host:port/database';
    ```
 
-5. Add your DeepSeek API key in `main10.js`:
+5. Add your DeepSeek API key in `generate-reports.js`:
    ```javascript
    const deepseekApiKey = 'your-deepseek-api-key';
    ```
@@ -64,7 +64,7 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
 
 ### Generate Reports from Database
 ```bash
-node main10.js
+node generate-reports.js
 ```
 This will:
 - Extract chat data from the last 24 hours
@@ -73,7 +73,7 @@ This will:
 
 ### Send Email Reports
 ```bash
-node reportSystem5.js
+node email-sender.js
 ```
 This will:
 - Process generated JSON reports
@@ -82,16 +82,16 @@ This will:
 
 ### Start Web Dashboard
 ```bash
-node nodeserver.js
+node dashboard-server.js
 ```
 Access the dashboard at `http://localhost:3000`
 
 ### NPM Scripts
 ```bash
-npm start                 # Send email reports (reportSystem5.js)
-npm run generate-reports  # Generate reports from database (main10.js)
-npm run send-reports      # Send email reports (reportSystem5.js)
-npm run dashboard         # Start web dashboard (nodeserver.js)
+npm start                 # Send email reports (email-sender.js)
+npm run generate-reports  # Generate reports from database (generate-reports.js)
+npm run send-reports      # Send email reports (email-sender.js)
+npm run dashboard         # Start web dashboard (dashboard-server.js)
 npm run full-process      # Generate reports then send emails
 ```
 
@@ -100,9 +100,9 @@ npm run full-process      # Generate reports then send emails
 ```
 ├── .env                           # Environment configuration
 ├── package.json                   # Dependencies and scripts
-├── main10.js                      # Database extraction and AI assessment
-├── reportSystem5.js               # Email delivery system
-├── nodeserver.js                  # Web dashboard server
+├── generate-reports.js            # Database extraction and AI assessment
+├── email-sender.js                # Email delivery system
+├── dashboard-server.js            # Web dashboard server
 ├── english_analytics_dashboard.html  # Dashboard frontend
 └── reports/                       # Generated reports
     └── YYYY-MM-DD/               # Date-based folders (yesterday's date)
@@ -213,9 +213,9 @@ The system uses DeepSeek API to generate structured educational assessments with
 
 ## 📈 Development Workflow
 
-1. Run `main10.js` to generate reports from database
-2. Run `reportSystem5.js` to send email reports
-3. Run `nodeserver.js` to view dashboard at localhost:3000
+1. Run `generate-reports.js` to generate reports from database
+2. Run `email-sender.js` to send email reports
+3. Run `dashboard-server.js` to view dashboard at localhost:3000
 4. Reports persist in filesystem for historical analysis
 
 ## 🐛 Troubleshooting
