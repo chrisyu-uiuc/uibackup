@@ -2,11 +2,13 @@
   "name": "english-practice-reports",
   "version": "1.0.0",
   "description": "Generate and send English practice reports via Gmail",
-  "main": "reportSystem.js",
+  "main": "reportSystem5.js",
   "scripts": {
-    "start": "node reportSystem.js",
-    "send-reports": "node reportSystem.js",
-    "generate-reports": "node reportSystem.js --generate-only"
+    "start": "node reportSystem5.js",
+    "generate-reports": "node main10.js",
+    "send-reports": "node reportSystem5.js",
+    "dashboard": "node nodeserver.js",
+    "full-process": "node main10.js && node reportSystem5.js"
   },
   "dependencies": {
     "googleapis": "^126.0.1",

@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Documentation Sync",
+  "description": "Monitors JavaScript source files and configuration files for changes, then automatically updates project documentation to reflect code modifications",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.js",
+      "package.json",
+      "*.html",
+      ".env"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files have been modified in this JavaScript/Node.js project. Please review the changes and update the documentation accordingly. Focus on updating the README.md file or any files in a /docs folder if it exists. Make sure to reflect any changes in functionality, API endpoints, configuration requirements, or usage instructions. Pay special attention to changes in main10.js, nodeserver.js, reportSystem5.js, and package.json as these are core system files."
+  }
+}
