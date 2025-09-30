@@ -1,10 +1,22 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 
-// Your connection strings
-const connectionString = 'postgresql://openwebui:ChrisYu2025%23@18.183.69.129:5432/openwebui';
-const deepseekApiKey = 'sk-55519482b35543b094114caf03dbda03';
+// Load configuration from environment variables
+const connectionString = process.env.DATABASE_URL;
+const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+
+// Validate required environment variables
+if (!connectionString) {
+  console.error('ERROR: DATABASE_URL environment variable is required');
+  process.exit(1);
+}
+
+if (!deepseekApiKey) {
+  console.error('ERROR: DEEPSEEK_API_KEY environment variable is required');
+  process.exit(1);
+}
 
 const pool = new Pool({
   connectionString: connectionString,

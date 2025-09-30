@@ -63,6 +63,8 @@ Required `.env` variables:
 - `GMAIL_USER`: Gmail account for sending emails
 - `GMAIL_APP_PASSWORD`: Gmail app-specific password
 - `TEACHER_EMAIL`: Recipient for teacher reports
+- `DATABASE_URL`: PostgreSQL connection string
+- `DEEPSEEK_API_KEY`: DeepSeek API key for AI assessments
 
 ## Database Connection
 PostgreSQL connection string format:

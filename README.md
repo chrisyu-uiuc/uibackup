@@ -50,16 +50,8 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
    GMAIL_USER=your-gmail@gmail.com
    GMAIL_APP_PASSWORD=your-app-specific-password
    TEACHER_EMAIL=teacher@example.com
-   ```
-
-4. Update database connection string in `generate-reports.js`:
-   ```javascript
-   const connectionString = 'postgresql://user:password@host:port/database';
-   ```
-
-5. Add your DeepSeek API key in `generate-reports.js`:
-   ```javascript
-   const deepseekApiKey = 'your-deepseek-api-key';
+   DATABASE_URL=postgresql://user:password@host:port/database
+   DEEPSEEK_API_KEY=your-deepseek-api-key
    ```
 
 ## 🚀 Usage
@@ -246,6 +238,7 @@ The system uses DeepSeek API to generate structured educational assessments with
 - Use Gmail app-specific passwords instead of regular passwords
 - Ensure PostgreSQL connection uses proper authentication
 - Keep DeepSeek API key secure
+- All sensitive configuration now uses environment variables for better security
 
 ## 🤖 Automated Scheduling
 
