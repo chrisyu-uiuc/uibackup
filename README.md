@@ -23,9 +23,9 @@ An automated English learning analytics platform that processes student chat con
 ### Data Flow
 
 ```
-PostgreSQL Database → main10.js → JSON Reports → reportSystem5.js → HTML Emails
-                                      ↓
-                                 nodeserver.js → Web Dashboard
+PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js → HTML Emails
+                                               ↓
+                                          dashboard-server.js → Web Dashboard
 ```
 
 ## 📋 Prerequisites
