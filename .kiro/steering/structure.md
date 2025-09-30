@@ -8,6 +8,9 @@
 ├── dashboard-server.js            # Express server for web dashboard
 ├── generate-reports.js            # Database extraction and report generation
 ├── email-sender.js                # Email delivery system
+├── scheduler.js                   # Automated task scheduler
+├── restartScheduler.sh            # PM2 process management script
+├── logs/                          # Scheduler and process logs
 └── reports/                       # Generated report storage
 ```
 
@@ -48,7 +51,22 @@ reports/
 - **Configuration**: Environment variables via dotenv
 
 ## Development Workflow
+
+### Manual Execution
 1. Run `generate-reports.js` to generate reports from database
 2. Run `email-sender.js` to send email reports
 3. Run `dashboard-server.js` to view dashboard at localhost:3000
 4. Reports persist in filesystem for historical analysis
+
+### Automated Execution
+1. Start scheduler with `node scheduler.js` or `./restartScheduler.sh`
+2. Monitor logs in `./logs/` directory
+3. Access dashboard at localhost:3000 for real-time data
+4. System runs continuously with automatic error recovery
+
+## Scheduler Architecture
+- **scheduler.js**: Main scheduling logic using node-schedule
+- **restartScheduler.sh**: PM2 deployment script for production
+- **logs/**: Centralized logging for all scheduled operations
+- **Execution Flow**: Reports → Email (only if reports succeed)
+- **Frequency**: Every 5 minutes (configurable in scheduler.js)

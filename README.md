@@ -19,6 +19,8 @@ An automated English learning analytics platform that processes student chat con
 2. **email-sender.js** - Email delivery system with HTML templates
 3. **dashboard-server.js** - Express web server for analytics dashboard
 4. **english_analytics_dashboard.html** - Frontend dashboard interface
+5. **scheduler.js** - Automated task scheduler using node-schedule
+6. **restartScheduler.sh** - PM2 process management script
 
 ### Data Flow
 
@@ -86,6 +88,19 @@ node dashboard-server.js
 ```
 Access the dashboard at `http://localhost:3000`
 
+### Automated Scheduling
+```bash
+# Start the automated scheduler (runs every 5 minutes)
+node scheduler.js
+
+# Or use PM2 for production deployment
+./restartScheduler.sh
+```
+The scheduler will automatically:
+- Generate reports from database every 5 minutes
+- Send email reports if report generation succeeds
+- Log all activities to `./logs/` directory
+
 ### NPM Scripts
 ```bash
 npm start                 # Send email reports (email-sender.js)
@@ -93,6 +108,22 @@ npm run generate-reports  # Generate reports from database (generate-reports.js)
 npm run send-reports      # Send email reports (email-sender.js)
 npm run dashboard         # Start web dashboard (dashboard-server.js)
 npm run full-process      # Generate reports then send emails
+```
+
+### Production Deployment
+```bash
+# Install PM2 globally for process management
+npm install -g pm2
+
+# Start automated scheduler with PM2
+./restartScheduler.sh
+
+# Monitor scheduler status
+pm2 status
+pm2 logs midnight-scheduler
+
+# Stop scheduler
+pm2 stop midnight-scheduler
 ```
 
 ## 📁 File Structure
@@ -103,7 +134,10 @@ npm run full-process      # Generate reports then send emails
 ├── generate-reports.js            # Database extraction and AI assessment
 ├── email-sender.js                # Email delivery system
 ├── dashboard-server.js            # Web dashboard server
+├── scheduler.js                   # Automated task scheduler
+├── restartScheduler.sh            # PM2 process management script
 ├── english_analytics_dashboard.html  # Dashboard frontend
+├── logs/                          # Scheduler and process logs
 └── reports/                       # Generated reports
     └── YYYY-MM-DD/               # Date-based folders (yesterday's date)
         ├── processing_overview.json  # Daily processing summary
@@ -198,6 +232,8 @@ The system uses DeepSeek API to generate structured educational assessments with
 - `googleapis` - Google APIs integration
 - `fs-extra` - Enhanced file operations
 - `dotenv` - Environment variable management
+- `node-schedule` - Task scheduling and automation
+- `pm2` - Process management for production deployment
 
 ### External APIs
 - **DeepSeek API** - AI-powered educational assessments
@@ -211,12 +247,44 @@ The system uses DeepSeek API to generate structured educational assessments with
 - Ensure PostgreSQL connection uses proper authentication
 - Keep DeepSeek API key secure
 
+## 🤖 Automated Scheduling
+
+The system includes an automated scheduler that runs tasks at regular intervals:
+
+### Scheduler Features
+- **Automatic Execution**: Runs every 5 minutes using node-schedule
+- **Sequential Processing**: Generates reports first, then sends emails only if successful
+- **Comprehensive Logging**: All activities logged to `./logs/` directory
+- **Process Management**: PM2 integration for production deployment
+- **Error Handling**: Graceful failure handling with detailed error logs
+
+### Scheduler Configuration
+The scheduler (`scheduler.js`) automatically:
+1. Runs `generate-reports.js` every 5 minutes
+2. If report generation succeeds, runs `email-sender.js`
+3. Logs all activities with timestamps to master log file
+4. Creates separate log files for each execution
+
+### Log Files
+- `logs/scheduler-master.log` - Main scheduler activity log
+- `logs/generate-reports-{timestamp}.out.log` - Report generation output
+- `logs/generate-reports-{timestamp}.err.log` - Report generation errors
+- `logs/email-sender-{timestamp}.out.log` - Email sending output
+- `logs/email-sender-{timestamp}.err.log` - Email sending errors
+
 ## 📈 Development Workflow
 
+### Manual Execution
 1. Run `generate-reports.js` to generate reports from database
 2. Run `email-sender.js` to send email reports
 3. Run `dashboard-server.js` to view dashboard at localhost:3000
 4. Reports persist in filesystem for historical analysis
+
+### Automated Execution
+1. Start scheduler with `node scheduler.js` or `./restartScheduler.sh`
+2. Monitor logs in `./logs/` directory
+3. Access dashboard at localhost:3000 for real-time data
+4. System runs continuously with automatic error recovery
 
 ## 🐛 Troubleshooting
 
@@ -237,6 +305,21 @@ The system uses DeepSeek API to generate structured educational assessments with
 4. **Reports Not Generated**
    - Ensure reports directory has write permissions
    - Check if there's chat data in the last 24 hours
+
+5. **Scheduler Not Running**
+   - Check PM2 status: `pm2 status`
+   - View scheduler logs: `pm2 logs midnight-scheduler`
+   - Restart scheduler: `./restartScheduler.sh`
+
+6. **Log Files Growing Too Large**
+   - Logs are automatically rotated by PM2
+   - Manual cleanup: `pm2 flush midnight-scheduler`
+   - Check disk space in `./logs/` directory
+
+7. **Process Memory Issues**
+   - Monitor with: `pm2 monit`
+   - Restart if needed: `pm2 restart midnight-scheduler`
+   - Check system resources
 
 ## 📝 License
 

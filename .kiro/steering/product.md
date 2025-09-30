@@ -10,6 +10,8 @@ An automated English learning analytics platform that processes student chat con
 - **Report Generation**: Creates detailed HTML reports for both students and teachers
 - **Email Distribution**: Automated delivery via Gmail API
 - **Web Dashboard**: Interactive analytics interface for viewing progress data
+- **Automated Scheduling**: Continuous operation with scheduled report generation and delivery
+- **Process Management**: Production-ready deployment with PM2 integration
 
 ### Target Users
 - **Students**: Receive personalized progress reports with performance feedback
@@ -22,3 +24,5 @@ An automated English learning analytics platform that processes student chat con
 3. Create structured JSON reports with full conversation history
 4. Generate HTML email reports for students and teachers
 5. Serve analytics through web dashboard interface
+6. Automated scheduling ensures continuous operation every 5 minutes
+7. Comprehensive logging tracks all system activities and errors

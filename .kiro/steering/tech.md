@@ -12,6 +12,8 @@
 - `fs-extra`: Enhanced file system operations
 - `dotenv`: Environment variable management
 - `pg`: PostgreSQL database client
+- `node-schedule`: Task scheduling and automation
+- `pm2`: Process management for production deployment
 
 ## External APIs
 - **DeepSeek API**: AI-powered educational assessment generation
@@ -36,6 +38,12 @@ node generate-reports.js
 
 # Send email reports to users
 node email-sender.js
+
+# Start automated scheduler
+node scheduler.js
+
+# Production deployment with PM2
+./restartScheduler.sh
 ```
 
 ### Package Management
