@@ -15,9 +15,9 @@ An automated English learning analytics platform that processes student chat con
 
 ### Core Components
 
-1. **main10.js** - Database extraction and report generation
-2. **reportSystem5.js** - Email delivery system with HTML templates
-3. **nodeserver.js** - Express web server for analytics dashboard
+1. **generate-reports.js** - Database extraction and report generation
+2. **email-sender.js** - Email delivery system with HTML templates
+3. **dashboard-server.js** - Express web server for analytics dashboard
 4. **english_analytics_dashboard.html** - Frontend dashboard interface
 
 ### Data Flow
