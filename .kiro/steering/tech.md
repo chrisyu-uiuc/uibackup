@@ -63,8 +63,10 @@ Required `.env` variables:
 - `GMAIL_USER`: Gmail account for sending emails
 - `GMAIL_APP_PASSWORD`: Gmail app-specific password
 - `TEACHER_EMAIL`: Recipient for teacher reports
-- `DATABASE_URL`: PostgreSQL connection string
-- `DEEPSEEK_API_KEY`: DeepSeek API key for AI assessments
+- `DATABASE_URL`: PostgreSQL connection string (REQUIRED - system exits if missing)
+- `DEEPSEEK_API_KEY`: DeepSeek API key for AI assessments (REQUIRED - system exits if missing)
+
+**Critical**: The report generation system now validates that `DATABASE_URL` and `DEEPSEEK_API_KEY` are configured at startup and will exit with an error if either is missing.
 
 ## Database Connection
 PostgreSQL connection string format:

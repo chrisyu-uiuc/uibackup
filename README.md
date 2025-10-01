@@ -54,6 +54,8 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
    DEEPSEEK_API_KEY=your-deepseek-api-key
    ```
 
+   **Note**: `DATABASE_URL` and `DEEPSEEK_API_KEY` are required for report generation. The system will exit with an error if these are not configured.
+
 ## 🚀 Usage
 
 ### Generate Reports from Database
@@ -283,16 +285,22 @@ The scheduler (`scheduler.js`) automatically:
 
 ### Common Issues
 
-1. **Database Connection Failed**
-   - Verify PostgreSQL connection string
-   - Check network connectivity and credentials
+1. **Environment Variables Missing**
+   - Error: "DATABASE_URL environment variable is required"
+   - Error: "DEEPSEEK_API_KEY environment variable is required"
+   - Solution: Ensure `.env` file exists with all required variables
 
-2. **Email Sending Failed**
+2. **Database Connection Failed**
+   - Verify PostgreSQL connection string format
+   - Check network connectivity and credentials
+   - Ensure DATABASE_URL is properly set
+
+3. **Email Sending Failed**
    - Ensure Gmail app-specific password is correct
    - Check Gmail account settings allow less secure apps
 
-3. **AI Assessment Failed**
-   - Verify DeepSeek API key is valid
+4. **AI Assessment Failed**
+   - Verify DeepSeek API key is valid and properly set
    - Check API rate limits and quotas
 
 4. **Reports Not Generated**
