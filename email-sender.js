@@ -798,7 +798,7 @@ class EnglishPracticeReports {
     }
 
     async loadUserData(userId) {
-        const reportsDir = path.join(__dirname, 'Reports', this.reportDate, userId);
+        const reportsDir = path.join(__dirname, 'reports', this.reportDate, userId);
         
         if (!await fs.pathExists(reportsDir)) {
             throw new Error(`Reports directory not found: ${reportsDir}`);
@@ -840,7 +840,7 @@ class EnglishPracticeReports {
     }
 
     async getAllStudentIds() {
-        const reportsBaseDir = path.join(__dirname, 'Reports', this.reportDate);
+        const reportsBaseDir = path.join(__dirname, 'reports', this.reportDate);
         
         if (!await fs.pathExists(reportsBaseDir)) {
             throw new Error(`Reports base directory not found: ${reportsBaseDir}`);

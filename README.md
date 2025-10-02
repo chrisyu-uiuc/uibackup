@@ -84,14 +84,14 @@ Access the dashboard at `http://localhost:3000`
 
 ### Automated Scheduling
 ```bash
-# Start the automated scheduler (runs every 5 minutes)
+# Start the automated scheduler (runs every minute)
 node scheduler.js
 
 # Or use PM2 for production deployment
 ./restartScheduler.sh
 ```
 The scheduler will automatically:
-- Generate reports from database every 5 minutes
+- Generate reports from database every minute
 - Send email reports if report generation succeeds
 - Log all activities to `./logs/` directory
 
@@ -247,7 +247,7 @@ The system uses DeepSeek API to generate structured educational assessments with
 The system includes an automated scheduler that runs tasks at regular intervals:
 
 ### Scheduler Features
-- **Automatic Execution**: Runs every 5 minutes using node-schedule
+- **Automatic Execution**: Runs every minute using node-schedule
 - **Sequential Processing**: Generates reports first, then sends emails only if successful
 - **Comprehensive Logging**: All activities logged to `./logs/` directory
 - **Process Management**: PM2 integration for production deployment
@@ -255,7 +255,7 @@ The system includes an automated scheduler that runs tasks at regular intervals:
 
 ### Scheduler Configuration
 The scheduler (`scheduler.js`) automatically:
-1. Runs `generate-reports.js` every 5 minutes
+1. Runs `generate-reports.js` every minute
 2. If report generation succeeds, runs `email-sender.js`
 3. Logs all activities with timestamps to master log file
 4. Creates separate log files for each execution
