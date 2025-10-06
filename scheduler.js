@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
 
-const WORKDIR = '/Users/mac/uibackup'; // change if needed
+const WORKDIR = __dirname;
 const NODE = process.execPath; // uses the Node interpreter that started this process
-const LOG_DIR = path.join(WORKDIR, 'logs');
+const LOG_DIR = path.join(__dirname, 'logs');
 
 fs.mkdirSync(LOG_DIR, { recursive: true });
 
@@ -52,9 +52,9 @@ function run(script, name, cb) {
   });
 }
 
-// every 5 minutes at second 0
-schedule.scheduleJob('0 0 * * * *', () => {
-  appendMasterLog('TRIGGER fired for every-5-minutes job');
+// daily at midnight (00:00:00)
+schedule.scheduleJob('0 0 0 * * *', () => {
+  appendMasterLog('TRIGGER fired for daily midnight job');
   run('generate-reports.js', 'generate-reports', (err, code) => {
     if (err || code !== 0) {
       appendMasterLog(`generate-reports failed (err=${err} code=${code}), skipping email-sender`);

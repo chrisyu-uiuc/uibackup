@@ -9,7 +9,7 @@ class EnglishPracticeReports {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-        this.reportDate = yesterday.toISOString().split('T')[0]; // YYYY-MM-DD of yesterday
+        this.reportDate = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`; // YYYY-MM-DD of yesterday
         this.teacherEmail = process.env.TEACHER_EMAIL;
     }
 
@@ -17,12 +17,12 @@ class EnglishPracticeReports {
         console.log('🚀 Starting English Practice Report System');
         console.log(`📅 Report Date (Yesterday): ${this.reportDate}`);
         console.log(`📧 Teacher Email: ${this.teacherEmail}`);
-        
+
         // Validate environment variables
         if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
             throw new Error('Missing Gmail configuration in .env file');
         }
-        
+
         return true;
     }
 
@@ -297,8 +297,8 @@ class EnglishPracticeReports {
             
             <h3 class="section-title">Recent Practice Sessions</h3>
             ${chatDetails.map((chat, index) => {
-                const fullChat = fullChatRecords[index];
-                return `
+            const fullChat = fullChatRecords[index];
+            return `
             <div class="chat-session">
                 <div class="chat-header">
                     <h4 class="chat-title">💬 ${chat.title}</h4>
@@ -346,11 +346,11 @@ class EnglishPracticeReports {
             <div class="improvement-box">
                 <h4 class="box-title">🎯 Areas to Focus On</h4>
                 <ul class="improvement-list">
-                    ${chatDetails.length > 0 ? 
-                      chatDetails[0].assessment.improvement_areas.split('. ')
-                         .filter(area => area.trim().length > 10)
-                         .map(area => `<li>${area.trim()}</li>`).join('') 
-                      : '<li>Continue your regular practice sessions</li><li>Try to use new vocabulary in conversations</li><li>Focus on sentence structure and grammar</li>'}
+                    ${chatDetails.length > 0 ?
+                chatDetails[0].assessment.improvement_areas.split('. ')
+                    .filter(area => area.trim().length > 10)
+                    .map(area => `<li>${area.trim()}</li>`).join('')
+                : '<li>Continue your regular practice sessions</li><li>Try to use new vocabulary in conversations</li><li>Focus on sentence structure and grammar</li>'}
                 </ul>
             </div>
             
@@ -378,11 +378,11 @@ class EnglishPracticeReports {
         const summary = userSummary.summary;
         const engagementLevel = summary.total_chats > 4 ? 'High' : summary.total_chats > 2 ? 'Moderate' : 'Low';
         const lastActivity = new Date(summary.last_activity).toLocaleDateString('en-GB');
-        const reportDateFormatted = new Date(this.reportDate).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        const reportDateFormatted = new Date(this.reportDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
 
         return `
@@ -678,8 +678,8 @@ class EnglishPracticeReports {
             
             <h3 class="section-title">📝 Detailed Session Analysis</h3>
             ${chatDetails.map((chat, index) => {
-                const fullChat = fullChatRecords[index];
-                return `
+            const fullChat = fullChatRecords[index];
+            return `
             <div class="chat-analysis">
                 <div class="chat-header">
                     <h4 class="chat-title">💬 ${chat.title}</h4>
@@ -768,7 +768,7 @@ class EnglishPracticeReports {
     async sendEmail(toEmail, subject, htmlContent) {
         try {
             const transporter = this.createEmailTransporter();
-            
+
             const mailOptions = {
                 from: `"English Practice System" <${process.env.GMAIL_USER}>`,
                 to: toEmail,
@@ -799,7 +799,7 @@ class EnglishPracticeReports {
 
     async loadUserData(userId) {
         const reportsDir = path.join(__dirname, 'reports', this.reportDate, userId);
-        
+
         if (!await fs.pathExists(reportsDir)) {
             throw new Error(`Reports directory not found: ${reportsDir}`);
         }
@@ -811,11 +811,11 @@ class EnglishPracticeReports {
         }
 
         const userSummary = await fs.readJson(summaryPath);
-        
+
         // Load chat details and full conversation history
         const chatDetails = [];
         const fullChatRecords = [];
-        
+
         for (const chat of userSummary.chat_overview) {
             const chatPath = path.join(reportsDir, chat.file_name);
             if (await fs.pathExists(chatPath)) {
@@ -827,7 +827,7 @@ class EnglishPracticeReports {
                     estimated_practice_time: chatData.chat_info.estimated_practice_time || 'N/A',
                     assessment: chatData.educational_assessment
                 });
-                
+
                 // Store full conversation history
                 fullChatRecords.push({
                     title: chatData.chat_info.title,
@@ -841,7 +841,7 @@ class EnglishPracticeReports {
 
     async getAllStudentIds() {
         const reportsBaseDir = path.join(__dirname, 'reports', this.reportDate);
-        
+
         if (!await fs.pathExists(reportsBaseDir)) {
             throw new Error(`Reports base directory not found: ${reportsBaseDir}`);
         }
@@ -852,7 +852,7 @@ class EnglishPracticeReports {
         for (const item of items) {
             const itemPath = path.join(reportsBaseDir, item);
             const stats = await fs.stat(itemPath);
-            
+
             if (stats.isDirectory()) {
                 // Check if this directory has a user_summary.json file
                 const userSummaryPath = path.join(itemPath, 'user_summary.json');
@@ -868,10 +868,10 @@ class EnglishPracticeReports {
     async sendDailyReports() {
         try {
             await this.initialize();
-            
+
             console.log('\n📂 Scanning for students...');
             const studentIds = await this.getAllStudentIds();
-            
+
             if (studentIds.length === 0) {
                 console.log('❌ No students found for yesterday');
                 return { error: 'No students found' };
@@ -883,10 +883,10 @@ class EnglishPracticeReports {
 
             for (const studentId of studentIds) {
                 console.log(`\n📂 Processing student: ${studentId}`);
-                
+
                 try {
                     const { userSummary, chatDetails, fullChatRecords } = await this.loadUserData(studentId);
-                    
+
                     console.log(`👤 Student: ${userSummary.user_info.user_name}`);
                     console.log(`📧 Student Email: ${userSummary.user_info.user_email}`);
                     console.log(`💬 Chats loaded: ${chatDetails.length}`);

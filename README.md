@@ -21,6 +21,9 @@ An automated English learning analytics platform that processes student chat con
 4. **english_analytics_dashboard.html** - Frontend dashboard interface
 5. **scheduler.js** - Automated task scheduler using node-schedule
 6. **restartScheduler.sh** - PM2 process management script
+7. **test-date-sync.js** - Date synchronization testing and validation utility
+8. **test-date-logic.js** - Date calculation logic testing utility
+9. **check-reports.js** - Report availability checking utility
 
 ### Data Flow
 
@@ -63,7 +66,7 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
 node generate-reports.js
 ```
 This will:
-- Extract chat data from the last 24 hours
+- Extract chat data from yesterday's date range (00:00:00 to 23:59:59 UTC)
 - Generate AI assessments for each conversation
 - Create structured JSON reports in `./reports/YYYY-MM-DD/` format
 
@@ -84,14 +87,14 @@ Access the dashboard at `http://localhost:3000`
 
 ### Automated Scheduling
 ```bash
-# Start the automated scheduler (runs every minute)
+# Start the automated scheduler (runs daily at midnight)
 node scheduler.js
 
 # Or use PM2 for production deployment
 ./restartScheduler.sh
 ```
 The scheduler will automatically:
-- Generate reports from database every minute
+- Generate reports from database daily at midnight (00:00:00)
 - Send email reports if report generation succeeds
 - Log all activities to `./logs/` directory
 
@@ -102,6 +105,23 @@ npm run generate-reports  # Generate reports from database (generate-reports.js)
 npm run send-reports      # Send email reports (email-sender.js)
 npm run dashboard         # Start web dashboard (dashboard-server.js)
 npm run full-process      # Generate reports then send emails
+npm run test-date-sync    # Test date synchronization between components
+```
+
+### Testing & Validation
+```bash
+# Test date synchronization between components
+npm run test-date-sync
+# or
+node test-date-sync.js
+
+# Test date logic used in report generation
+node test-date-logic.js
+
+# Check available reports for yesterday's date
+npm run check-reports
+# or
+node check-reports.js
 ```
 
 ### Production Deployment
@@ -109,7 +129,7 @@ npm run full-process      # Generate reports then send emails
 # Install PM2 globally for process management
 npm install -g pm2
 
-# Start automated scheduler with PM2
+# Start automated scheduler with PM2 (automatically uses current directory)
 ./restartScheduler.sh
 
 # Monitor scheduler status
@@ -130,6 +150,9 @@ pm2 stop midnight-scheduler
 ├── dashboard-server.js            # Web dashboard server
 ├── scheduler.js                   # Automated task scheduler
 ├── restartScheduler.sh            # PM2 process management script
+├── test-date-sync.js              # Date synchronization testing utility
+├── test-date-logic.js             # Date calculation logic testing utility
+├── check-reports.js               # Report availability checking utility
 ├── english_analytics_dashboard.html  # Dashboard frontend
 ├── logs/                          # Scheduler and process logs
 └── reports/                       # Generated reports
@@ -247,7 +270,8 @@ The system uses DeepSeek API to generate structured educational assessments with
 The system includes an automated scheduler that runs tasks at regular intervals:
 
 ### Scheduler Features
-- **Automatic Execution**: Runs every minute using node-schedule
+- **Portable Configuration**: Automatically uses current working directory (no hardcoded paths)
+- **Automatic Execution**: Runs daily at midnight (00:00:00) using node-schedule
 - **Sequential Processing**: Generates reports first, then sends emails only if successful
 - **Comprehensive Logging**: All activities logged to `./logs/` directory
 - **Process Management**: PM2 integration for production deployment
@@ -255,10 +279,11 @@ The system includes an automated scheduler that runs tasks at regular intervals:
 
 ### Scheduler Configuration
 The scheduler (`scheduler.js`) automatically:
-1. Runs `generate-reports.js` every minute
-2. If report generation succeeds, runs `email-sender.js`
-3. Logs all activities with timestamps to master log file
-4. Creates separate log files for each execution
+1. Uses the current working directory (no hardcoded paths)
+2. Runs `generate-reports.js` daily at midnight (00:00:00)
+3. If report generation succeeds, runs `email-sender.js`
+4. Logs all activities with timestamps to master log file
+5. Creates separate log files for each execution
 
 ### Log Files
 - `logs/scheduler-master.log` - Main scheduler activity log
@@ -281,43 +306,130 @@ The scheduler (`scheduler.js`) automatically:
 3. Access dashboard at localhost:3000 for real-time data
 4. System runs continuously with automatic error recovery
 
+## 🧪 Testing & Validation
+
+The system includes comprehensive testing utilities to ensure proper functionality and date synchronization:
+
+### Date Synchronization Test
+Verify that all components use consistent date logic:
+
+```bash
+npm run test-date-sync
+```
+
+This test will:
+- ✅ Verify date calculation consistency between `generate-reports.js` and `email-sender.js`
+- ✅ Check if reports directory exists for yesterday's date
+- ✅ List available student reports
+- ✅ Confirm system readiness for email sending
+- ✅ Validate directory structure and file paths
+
+### Date Logic Test
+Test the core date calculation logic used in report generation:
+
+```bash
+node test-date-logic.js
+```
+
+This test will:
+- ✅ Display current date and calculated report date (yesterday)
+- ✅ Show database query date range (yesterday 00:00:00 to 23:59:59)
+- ✅ Convert to Unix timestamps for database queries
+- ✅ Test sample dates to verify inclusion/exclusion logic
+- ✅ Validate that the system correctly identifies yesterday's data
+
+### Report Availability Check
+Check what reports are available for processing:
+
+```bash
+npm run check-reports
+# or
+node check-reports.js
+```
+
+This utility will:
+- ✅ Check if reports directory exists for yesterday's date
+- ✅ List all available student reports
+- ✅ Display student names and activity summaries
+- ✅ Confirm system readiness for email distribution
+- ✅ Provide guidance on next steps
+
+**Expected Output:**
+```
+🔍 Testing Date Synchronization Between Report Generation and Email Sending
+
+📅 Expected Report Date (Yesterday): 2025-10-03
+📧 Email Sender Report Date: 2025-10-03
+✅ Date synchronization: PASSED
+
+📂 Reports Directory Check:
+   Path: /path/to/reports/2025-10-03
+   Exists: ✅ YES
+
+👥 Available Students: 2
+   1. user-uuid-1
+   2. user-uuid-2
+
+🎉 Ready to send emails for yesterday's reports!
+```
+
+### When to Run Tests
+- **After initial setup** to verify configuration
+- **Before running automated scheduler** in production
+- **When troubleshooting date-related issues** or data synchronization problems
+- **After making changes** to date calculation logic
+- **Daily monitoring** to ensure reports are being generated correctly
+- **Before manual email sending** to confirm reports are available
+
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Environment Variables Missing**
+1. **Date Synchronization Issues**
+   - Run `node test-date-sync.js` to diagnose date calculation problems
+   - Run `node test-date-logic.js` to verify core date logic
+   - Ensure both components use identical yesterday date logic
+   - Check timezone settings if dates don't match
+
+2. **Environment Variables Missing**
    - Error: "DATABASE_URL environment variable is required"
    - Error: "DEEPSEEK_API_KEY environment variable is required"
    - Solution: Ensure `.env` file exists with all required variables
 
-2. **Database Connection Failed**
+3. **Database Connection Failed**
    - Verify PostgreSQL connection string format
    - Check network connectivity and credentials
    - Ensure DATABASE_URL is properly set
 
-3. **Email Sending Failed**
+4. **Email Sending Failed**
    - Ensure Gmail app-specific password is correct
    - Check Gmail account settings allow less secure apps
 
-4. **AI Assessment Failed**
+5. **AI Assessment Failed**
    - Verify DeepSeek API key is valid and properly set
    - Check API rate limits and quotas
 
-4. **Reports Not Generated**
+6. **Reports Not Generated**
    - Ensure reports directory has write permissions
    - Check if there's chat data in the last 24 hours
+   - Run date sync test to verify directory paths
 
 5. **Scheduler Not Running**
    - Check PM2 status: `pm2 status`
    - View scheduler logs: `pm2 logs midnight-scheduler`
    - Restart scheduler: `./restartScheduler.sh`
 
-6. **Log Files Growing Too Large**
+6. **Path Configuration Issues**
+   - The scheduler now automatically uses the current working directory
+   - Ensure you run `./restartScheduler.sh` from the project root directory
+   - No manual path configuration needed in scheduler.js
+
+7. **Log Files Growing Too Large**
    - Logs are automatically rotated by PM2
    - Manual cleanup: `pm2 flush midnight-scheduler`
    - Check disk space in `./logs/` directory
 
-7. **Process Memory Issues**
+8. **Process Memory Issues**
    - Monitor with: `pm2 monit`
    - Restart if needed: `pm2 restart midnight-scheduler`
    - Check system resources
