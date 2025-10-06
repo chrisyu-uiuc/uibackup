@@ -28,7 +28,7 @@ const pool = new Pool({
 // Get current date for folder naming
 const today = new Date();
 today.setDate(today.getDate() - 1);
-const currentDate = today.toISOString().split('T')[0];
+const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 const baseDir = `./reports/${currentDate}`;
 
 // Ensure base directory exists
@@ -38,6 +38,24 @@ if (!fs.existsSync(baseDir)) {
 }
 
 async function getRecentChatsWithUserInfo() {
+  // Calculate yesterday's date range using local timezone (same logic as folder naming)
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  // Get start and end of yesterday in local timezone
+  const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0);
+  const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999);
+  
+  // Convert to Unix timestamps (seconds)
+  const startTimestamp = Math.floor(yesterdayStart.getTime() / 1000);
+  const endTimestamp = Math.floor(yesterdayEnd.getTime() / 1000);
+  
+  console.log(`Querying chats for yesterday: ${currentDate}`);
+  console.log(`Local time range: ${yesterdayStart.toString()} to ${yesterdayEnd.toString()}`);
+  console.log(`UTC time range: ${yesterdayStart.toISOString()} to ${yesterdayEnd.toISOString()}`);
+  console.log(`Unix timestamps: ${startTimestamp} to ${endTimestamp}`);
+
   const query = `
     SELECT 
       u.id as user_id,
@@ -50,14 +68,14 @@ async function getRecentChatsWithUserInfo() {
       c.chat as chat_data
     FROM chat c
     JOIN "user" u ON c.user_id = u.id
-    WHERE c.created_at >= EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours')
-       OR c.updated_at >= EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours')
+    WHERE (c.created_at >= $1 AND c.created_at <= $2)
+       OR (c.updated_at >= $1 AND c.updated_at <= $2)
     ORDER BY u.name, c.updated_at DESC
   `;
 
   try {
-    const result = await pool.query(query);
-    console.log(`Found ${result.rows.length} recent chats`);
+    const result = await pool.query(query, [startTimestamp, endTimestamp]);
+    console.log(`Found ${result.rows.length} chats for yesterday (${currentDate})`);
     return result.rows;
   } catch (error) {
     console.error('Database query error:', error);
@@ -74,22 +92,22 @@ function processCompleteMessages(messages) {
   const processedMessages = messages.map(msg => {
     const content = msg.content || '';
     const role = msg.role || '';
-    
+
     // Count by role
     if (role === 'user') userCount++;
     if (role === 'assistant') assistantCount++;
-    
+
     // Track models
     if (msg.model) modelsUsed.add(msg.model);
     if (msg.models && Array.isArray(msg.models)) {
       msg.models.forEach(model => modelsUsed.add(model));
     }
-    
+
     // Estimate tokens (rough approximation)
     if (content) {
       totalTokens += Math.ceil(content.length / 4);
     }
-    
+
     return {
       role: role,
       content: content,
@@ -98,10 +116,10 @@ function processCompleteMessages(messages) {
       model: msg.model || (msg.models && msg.models[0]) || null
     };
   });
-  
+
   // Sort messages by timestamp
   processedMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-  
+
   return {
     messages: processedMessages,
     total: messages.length,
@@ -114,10 +132,10 @@ function processCompleteMessages(messages) {
 
 function analyzeChatData(chats) {
   const userStats = {};
-  
+
   chats.forEach(chat => {
     const { user_id, user_name, user_email, chat_id, title, created_at, updated_at, chat_data } = chat;
-    
+
     if (!userStats[user_id]) {
       userStats[user_id] = {
         user_id,
@@ -133,33 +151,33 @@ function analyzeChatData(chats) {
         chats: []
       };
     }
-    
+
     const userStat = userStats[user_id];
     userStat.totalChats++;
-    
+
     try {
       const chatJson = typeof chat_data === 'string' ? JSON.parse(chat_data) : chat_data;
-      
+
       // Process complete messages array
       const messages = chatJson.messages || [];
       const messageStats = processCompleteMessages(messages);
-      
+
       userStat.totalMessages += messageStats.total;
       userStat.userMessages += messageStats.user;
       userStat.assistantMessages += messageStats.assistant;
       userStat.totalTokens += messageStats.tokens;
-      
+
       // Track models used
       messageStats.modelsUsed.forEach(model => userStat.modelsUsed.add(model));
       if (chatJson.models && Array.isArray(chatJson.models)) {
         chatJson.models.forEach(model => userStat.modelsUsed.add(model));
       }
-      
+
       // Update last activity
       if (updated_at > userStat.lastActivity) {
         userStat.lastActivity = updated_at;
       }
-      
+
       // Store complete chat details with all messages
       userStat.chats.push({
         chat_id,
@@ -172,18 +190,18 @@ function analyzeChatData(chats) {
         estimatedTokens: messageStats.tokens,
         assessment: null // Will be filled by AI assessment
       });
-      
+
     } catch (error) {
       console.error(`Error processing chat ${chat_id}:`, error.message);
     }
   });
-  
+
   // Convert sets to arrays for output
   Object.values(userStats).forEach(stat => {
     stat.modelsUsed = Array.from(stat.modelsUsed);
     stat.lastActivity = new Date(stat.lastActivity * 1000).toISOString();
   });
-  
+
   return userStats;
 }
 
@@ -199,13 +217,13 @@ function parseStructuredAssessment(text) {
       improvement_areas: '',
       encouragement: ''
     };
-    
+
     const lines = text.split('\n');
     let currentSection = '';
-    
+
     for (const line of lines) {
       const trimmedLine = line.trim();
-      
+
       if (trimmedLine.includes('PERFORMANCE COMMENT:')) {
         currentSection = 'performance_comment';
         assessment.performance_comment = trimmedLine.replace('PERFORMANCE COMMENT:', '').trim();
@@ -223,12 +241,12 @@ function parseStructuredAssessment(text) {
         assessment[currentSection] += ' ' + trimmedLine;
       }
     }
-    
+
     // Clean up each section
     Object.keys(assessment).forEach(key => {
       assessment[key] = assessment[key].trim();
     });
-    
+
     return assessment;
   }
 }
@@ -289,15 +307,15 @@ Please be constructive, specific, and encouraging in your feedback. Focus on the
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    
+
     // Parse the structured assessment
     return parseStructuredAssessment(content);
-    
+
   } catch (error) {
     console.error('Error generating educational assessment:', error.message);
     return {
       performance_comment: "Assessment unavailable",
-      correction: "Assessment unavailable", 
+      correction: "Assessment unavailable",
       improvement_areas: "Assessment unavailable",
       encouragement: "Assessment unavailable",
       error: error.message
@@ -311,7 +329,7 @@ function createUserChatJSON(user, chat, index) {
   if (!fs.existsSync(userDir)) {
     fs.mkdirSync(userDir, { recursive: true });
   }
-  
+
   const chatData = {
     user_info: {
       user_id: user.user_id,
@@ -324,7 +342,7 @@ function createUserChatJSON(user, chat, index) {
       created_at: chat.created_at,
       updated_at: chat.updated_at,
       message_count: chat.messageCount,
-      estimated_practice_time: `${Math.round(chat.estimatedTokens/50)} minutes`,
+      estimated_practice_time: `${Math.round(chat.estimatedTokens / 50)} minutes`,
       models_used: chat.models
     },
     conversation_history: chat.messages.map(msg => ({
@@ -336,19 +354,19 @@ function createUserChatJSON(user, chat, index) {
     educational_assessment: chat.assessment || {
       performance_comment: "Assessment not available",
       correction: "Assessment not available",
-      improvement_areas: "Assessment not available", 
+      improvement_areas: "Assessment not available",
       encouragement: "Assessment not available"
     }
   };
-  
+
   // Create safe filename from chat title
   const safeTitle = chat.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
   const filename = `chat_${index + 1}_${safeTitle}.json`;
   const filePath = path.join(userDir, filename);
-  
+
   fs.writeFileSync(filePath, JSON.stringify(chatData, null, 2));
   console.log(`  ✓ Created: ${filename}`);
-  
+
   return filePath;
 }
 
@@ -357,7 +375,7 @@ function createUserSummaryJSON(user) {
   if (!fs.existsSync(userDir)) {
     fs.mkdirSync(userDir, { recursive: true });
   }
-  
+
   const userSummary = {
     user_info: {
       user_id: user.user_id,
@@ -382,37 +400,37 @@ function createUserSummaryJSON(user) {
       file_name: `chat_${index + 1}_${chat.title.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50)}.json`
     }))
   };
-  
+
   const summaryPath = path.join(userDir, 'user_summary.json');
   fs.writeFileSync(summaryPath, JSON.stringify(userSummary, null, 2));
   console.log(`  ✓ Created: user_summary.json`);
-  
+
   return summaryPath;
 }
 
 async function processUserAssessmentsAndGenerateFiles(userStats) {
   console.log('\n=== PROCESSING USER ASSESSMENTS AND GENERATING FILES ===');
   console.log('='.repeat(60));
-  
+
   let totalFilesCreated = 0;
   let processedUsers = 0;
-  
+
   for (const userId in userStats) {
     const user = userStats[userId];
     console.log(`\nProcessing user: ${user.user_name}`);
-    
+
     // Create user directory immediately
     const userDir = path.join(baseDir, user.user_id);
     if (!fs.existsSync(userDir)) {
       fs.mkdirSync(userDir, { recursive: true });
     }
-    
+
     let userFilesCreated = 0;
-    
+
     // Process each chat for this user
     for (const [index, chat] of user.chats.entries()) {
       console.log(`  Assessing chat ${index + 1}/${user.chats.length}: "${chat.title}"`);
-      
+
       // Only assess chats with user messages
       const hasUserMessages = chat.messages.some(msg => msg.role === 'user');
       if (!hasUserMessages) {
@@ -426,10 +444,10 @@ async function processUserAssessmentsAndGenerateFiles(userStats) {
         try {
           chat.assessment = await generateEducationalAssessment(chat);
           console.log(`    ✓ Structured assessment completed`);
-          
+
           // Add delay to avoid rate limiting
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
         } catch (error) {
           console.error(`    ✗ Failed to assess chat:`, error.message);
           chat.assessment = {
@@ -441,31 +459,31 @@ async function processUserAssessmentsAndGenerateFiles(userStats) {
           };
         }
       }
-      
+
       // Generate JSON file for this chat immediately after assessment
       createUserChatJSON(user, chat, index);
       userFilesCreated++;
       totalFilesCreated++;
     }
-    
+
     // Generate user summary after all chats are processed
     createUserSummaryJSON(user);
     userFilesCreated++;
     totalFilesCreated++;
-    
+
     processedUsers++;
     console.log(`✓ Completed user: ${user.user_name} (${userFilesCreated} files created)`);
   }
-  
+
   return { totalFilesCreated, processedUsers };
 }
 
 function generateSummaryReport(userStats) {
   const users = Object.values(userStats);
-  
+
   console.log('\n=== ENGLISH PRACTICE SUMMARY ===');
   console.log('='.repeat(45));
-  
+
   users.forEach((user, index) => {
     console.log(`\n${index + 1}. Student: ${user.user_name}`);
     console.log(`   Practice Sessions: ${user.totalChats}`);
@@ -473,7 +491,7 @@ function generateSummaryReport(userStats) {
     console.log(`   Student Messages: ${user.userMessages}`);
     console.log(`   Chatbot Responses: ${user.assistantMessages}`);
     console.log(`   Last Active: ${user.lastActivity}`);
-    
+
     // Show session previews with assessment status
     if (user.chats.length > 0) {
       console.log(`   Recent Practice Sessions:`);
@@ -486,7 +504,7 @@ function generateSummaryReport(userStats) {
       }
     }
   });
-  
+
   // Global summary
   console.log('\n' + '='.repeat(45));
   console.log('OVERALL PRACTICE SUMMARY:');
@@ -494,7 +512,7 @@ function generateSummaryReport(userStats) {
   console.log(`Total Practice Sessions: ${users.reduce((sum, user) => sum + user.totalChats, 0)}`);
   console.log(`Total Learning Interactions: ${users.reduce((sum, user) => sum + user.totalMessages, 0)}`);
   console.log(`Total Student Contributions: ${users.reduce((sum, user) => sum + user.userMessages, 0)}`);
-  
+
   return users;
 }
 
@@ -518,11 +536,11 @@ function createCompleteAnalysisReport(userStats, processingResults) {
       last_activity: user.lastActivity
     }))
   };
-  
+
   const completeReportPath = path.join(baseDir, 'processing_overview.json');
   fs.writeFileSync(completeReportPath, JSON.stringify(completeReport, null, 2));
   console.log(`\n✓ Processing overview saved to: ${completeReportPath}`);
-  
+
   return completeReportPath;
 }
 
@@ -532,7 +550,7 @@ function printEmailInstructions(userStats) {
   console.log('\nTo send reports via Google Email API:');
   console.log('\n1. Reports are organized in the following structure:');
   console.log(`   ${baseDir}/`);
-  
+
   Object.values(userStats).forEach(user => {
     console.log(`   └── ${user.user_id}/ (${user.user_name})`);
     console.log(`       ├── user_summary.json`);
@@ -541,16 +559,16 @@ function printEmailInstructions(userStats) {
       console.log(`       ├── chat_${index + 1}_${safeTitle}.json`);
     });
   });
-  
+
   console.log('\n2. For each user, you can:');
   console.log('   - Send the user_summary.json as a quick overview');
   console.log('   - Send individual chat JSON files for detailed analysis');
   console.log('   - Attach files or include JSON content in email body');
-  
+
   console.log('\n3. Email template suggestions:');
   console.log('   Subject: Your English Practice Report - [Date]');
   console.log('   Body: Include personalized feedback and encourage continued practice');
-  
+
   console.log('\n4. Total files available for distribution:');
   const totalChats = Object.values(userStats).reduce((sum, user) => sum + user.chats.length, 0);
   const totalUsers = Object.keys(userStats).length;
@@ -562,41 +580,41 @@ function printEmailInstructions(userStats) {
 async function main() {
   console.log('Starting English practice analysis...');
   console.log('Connecting to database...');
-  
+
   try {
     // Test connection
     await pool.query('SELECT 1');
     console.log('Database connected successfully!');
-    
+
     // Get recent chats with user info
     const chats = await getRecentChatsWithUserInfo();
-    
+
     if (chats.length === 0) {
       console.log('No recent chat activity found in the last 24 hours.');
       return;
     }
-    
+
     // Analyze data
     console.log('Analyzing practice data...');
     const userStats = analyzeChatData(chats);
-    
+
     // Process assessments and generate files incrementally
     const processingResults = await processUserAssessmentsAndGenerateFiles(userStats);
-    
+
     // Generate console summary
     generateSummaryReport(userStats);
-    
+
     // Create processing overview (instead of complete analysis report)
     createCompleteAnalysisReport(userStats, processingResults);
-    
+
     // Print email distribution instructions
     printEmailInstructions(userStats);
-    
+
     console.log(`\n✅ All processing completed!`);
     console.log(`📁 Reports generated in: ${baseDir}`);
     console.log(`👥 Users processed: ${processingResults.processedUsers}`);
     console.log(`📄 Total files created: ${processingResults.totalFilesCreated}`);
-    
+
   } catch (error) {
     console.error('Error:', error.message);
   } finally {
