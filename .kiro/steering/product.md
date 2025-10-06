@@ -24,5 +24,5 @@ An automated English learning analytics platform that processes student chat con
 3. Create structured JSON reports with full conversation history
 4. Generate HTML email reports for students and teachers
 5. Serve analytics through web dashboard interface
-6. Automated scheduling ensures continuous operation every 24 hours
+6. Automated scheduling ensures continuous operation with daily midnight execution
 7. Comprehensive logging tracks all system activities and errors

@@ -69,4 +69,4 @@ reports/
 - **restartScheduler.sh**: PM2 deployment script for production
 - **logs/**: Centralized logging for all scheduled operations
 - **Execution Flow**: Reports → Email (only if reports succeed)
-- **Frequency**: Every 24 hours (configurable in scheduler.js)
+- **Frequency**: Daily at midnight (00:00:00) - configurable in scheduler.js
