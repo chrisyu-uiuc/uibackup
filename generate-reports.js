@@ -89,7 +89,24 @@ function processCompleteMessages(messages) {
   let totalTokens = 0;
   let modelsUsed = new Set();
 
-  const processedMessages = messages.map(msg => {
+  // Calculate yesterday's date range for message filtering
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0);
+  const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999);
+  
+  const startTimestamp = Math.floor(yesterdayStart.getTime() / 1000);
+  const endTimestamp = Math.floor(yesterdayEnd.getTime() / 1000);
+
+  // Filter messages to only include those from yesterday, then process them
+  const filteredMessages = messages.filter(msg => {
+    if (!msg.timestamp) return false;
+    return msg.timestamp >= startTimestamp && msg.timestamp <= endTimestamp;
+  });
+
+  const processedMessages = filteredMessages.map(msg => {
     const content = msg.content || '';
     const role = msg.role || '';
 
@@ -122,7 +139,7 @@ function processCompleteMessages(messages) {
 
   return {
     messages: processedMessages,
-    total: messages.length,
+    total: processedMessages.length, // Use filtered count, not original count
     user: userCount,
     assistant: assistantCount,
     tokens: totalTokens,
