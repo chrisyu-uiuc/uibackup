@@ -16,9 +16,9 @@
 - `pm2`: Process management for production deployment
 
 ## External APIs
-- **DeepSeek API**: AI-powered educational assessment generation
+- **DeepSeek API**: AI-powered educational assessment generation with structured JSON output
 - **Gmail SMTP**: Automated email delivery system
-- **PostgreSQL Database**: OpenWebUI chat data source
+- **PostgreSQL Database**: OpenWebUI chat data source with timestamp-based filtering
 
 ## File Structure
 - Reports stored in `./reports/YYYY-MM-DD/user-id/` format
@@ -66,7 +66,7 @@ Required `.env` variables:
 - `DATABASE_URL`: PostgreSQL connection string (REQUIRED - system exits if missing)
 - `DEEPSEEK_API_KEY`: DeepSeek API key for AI assessments (REQUIRED - system exits if missing)
 
-**Critical**: The report generation system now validates that `DATABASE_URL` and `DEEPSEEK_API_KEY` are configured at startup and will exit with an error if either is missing.
+**Critical**: The report generation system now validates that `DATABASE_URL` and `DEEPSEEK_API_KEY` are configured at startup and will exit with an error if either is missing. The system includes enhanced date filtering, AI assessment generation with rate limiting, and incremental file processing for improved performance and reliability.
 
 ## Database Connection
 PostgreSQL connection string format:

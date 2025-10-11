@@ -12,6 +12,22 @@ today.setDate(today.getDate() - 1);  // Go back 1 day
 const reportDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 ```
 
+### Enhanced Date Filtering in generate-reports.js:
+```javascript
+// Calculate yesterday's date range using local timezone
+const now = new Date();
+const yesterday = new Date(now);
+yesterday.setDate(yesterday.getDate() - 1);
+
+// Get start and end of yesterday in local timezone
+const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0, 0);
+const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59, 999);
+
+// Convert to Unix timestamps (seconds)
+const startTimestamp = Math.floor(yesterdayStart.getTime() / 1000);
+const endTimestamp = Math.floor(yesterdayEnd.getTime() / 1000);
+```
+
 ### Example:
 - If today is **October 4, 2025**
 - Reports will be generated/sent for **October 3, 2025**
@@ -20,12 +36,15 @@ const reportDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padSta
 ## File Synchronization
 
 ### generate-reports.js
-- **Purpose**: Creates reports from database data
+- **Purpose**: Creates reports from database data with AI assessments
 - **Date Used**: Yesterday (`today.getDate() - 1`)
 - **Directory Created**: `./reports/YYYY-MM-DD/` (yesterday's date)
+- **Database Query**: Filters chats created or updated yesterday
+- **Message Filtering**: Only includes messages from yesterday's timeframe
 - **Files Created**: 
-  - `user_summary.json` for each user
-  - `chat_N_Title.json` for each conversation
+  - `user_summary.json` for each user with activity overview
+  - `chat_N_Title.json` for each conversation with full history and AI assessment
+  - `processing_overview.json` with daily processing summary
 
 ### email-sender.js
 - **Purpose**: Sends email reports to students and teachers
@@ -85,10 +104,12 @@ npm run check-reports
 ## Why Yesterday's Date?
 
 ### Benefits:
-1. **Complete Data**: Ensures all of yesterday's conversations are captured
+1. **Complete Data**: Ensures all of yesterday's conversations are captured with precise timestamp filtering
 2. **Consistent Timing**: Reports sent in the morning for previous day's activity
 3. **Database Consistency**: Avoids partial data from ongoing conversations
 4. **Scheduling Friendly**: Works well with automated daily scheduling
+5. **Message Accuracy**: Filters individual messages by timestamp to ensure only yesterday's content
+6. **Timezone Handling**: Uses local timezone for consistent date boundaries
 
 ### Use Cases:
 - **Morning Reports**: Send yesterday's progress each morning
