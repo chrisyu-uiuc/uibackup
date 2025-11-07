@@ -50,7 +50,25 @@ PostgreSQL Database → generate-reports.js → JSON Reports → email-sender.js
    npm install
    ```
 
-3. Configure environment variables in `.env`:
+3. **Configure system timezone** (Required for accurate date-based report generation):
+   ```bash
+   sudo timedatectl set-timezone <your_timezone>
+   ```
+   
+   Examples:
+   - US Eastern: `sudo timedatectl set-timezone America/New_York`
+   - US Pacific: `sudo timedatectl set-timezone America/Los_Angeles`
+   - UK: `sudo timedatectl set-timezone Europe/London`
+   - Japan: `sudo timedatectl set-timezone Asia/Tokyo`
+   
+   **Why this is needed**: The system uses local timezone to calculate "yesterday's date" for report generation. Without proper timezone configuration, reports may be generated for the wrong date range.
+   
+   To verify your current timezone:
+   ```bash
+   timedatectl
+   ```
+
+4. Configure environment variables in `.env`:
    ```env
    GMAIL_USER=your-gmail@gmail.com
    GMAIL_APP_PASSWORD=your-app-specific-password
